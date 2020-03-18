@@ -3,6 +3,13 @@ from tkinter import ttk
 from subprocess import Popen
 import datetime
 import time
+from PIL import ImageGrab
+import aircv as ac
+import win32con
+import time
+import ctypes
+
+
 
 hour = ['00', '00', '00', '00', '00', '00', '00', '00', '00', '00']
 min = ['00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00', '00',
@@ -313,6 +320,75 @@ app.title("定时开关")
 app.geometry('800x500')
 
 
+# 截图
+def PrtSc(mypng):
+    print("截图")
+    im = ImageGrab.grab()
+    # 放到pic文件夹下
+    im.save(mypng)
+    time.sleep(1)
+
+
+# 对比两张图，找到坐标。
+def matchImg(imgsrc, imgobj):  # imgsrc=原始图像，imgobj=待查找的图片
+    imsrc = ac.imread(imgsrc)
+    imobj = ac.imread(imgobj)
+    match_result = ac.find_template(imsrc, imobj,
+                                    0.8)  # 0.9、confidence是精度，越小对比的精度就越低 {'confidence': 0.5435812473297119,
+    # 'rectangle': ((394, 384), (394, 416), (450, 384), (450, 416)), 'result': (422.0, 400.0)}
+
+    if match_result is not None:
+        match_result['shape'] = (imsrc.shape[1], imsrc.shape[0])  # 0为高，1为宽
+    return match_result
+
+
+def click(x, y):
+    ctypes.windll.user32.SetCursorPos(x, y)
+    ctypes.windll.user32.mouse_event(2, 0, 0, 0, 0)
+    ctypes.windll.user32.mouse_event(4, 0, 0, 0, 0)
+    time.sleep(1)
+
+
+# 对比图片并点击
+def matchImgClick(myScreencap, mypng):
+    if matchImg(myScreencap, mypng) is not None:
+        print("-------------点击按钮！" + mypng + str(
+            matchImg(myScreencap, mypng)['result'][0]) + ',' + str(
+            matchImg(myScreencap, mypng)['result'][1]))
+        myx = str(matchImg(myScreencap, mypng)['result'][0])
+        myy = str(matchImg(myScreencap, mypng)['result'][1])
+        click(int(float(myx)), int(float(myy)))
+        time.sleep(2)
+        print("-------------结束点击按钮。")
+
+
+# if对比图片并点击
+def ifmatchImgClick(myScreencap, mypng):
+    if matchImg(myScreencap, mypng) is not None:
+        print("-------------！" + mypng + str(
+            matchImg(myScreencap, mypng)['result'][0]) + ',' + str(
+            matchImg(myScreencap, mypng)['result'][1]))
+        myx = str(matchImg(myScreencap, mypng)['result'][0])
+        myy = str(matchImg(myScreencap, mypng)['result'][1])
+        # click(int(float(myx)), int(float(myy)))
+        print("-------------对比图片return True")
+        return True
+        # time.sleep(2)
+    else:
+        print("-------------对比图片return False")
+        return False
+
+
+def stop_audio():
+    PrtSc("Screencap.png")
+    matchImgClick("Screencap.png", "stop.png")
+
+
+def start_audio():
+    PrtSc("Screencap.png")
+    matchImgClick("Screencap.png", "start.png")
+
+
 def clock():
     mytime = datetime.datetime.now()
     # print("after定时执行" + str(mytime))
@@ -324,65 +400,77 @@ def clock():
     if (mytime.hour == int(hour[0])) and (mytime.minute == int(min[0])):
         # print("lai")
         if str(myswitch[0]) == '0':
+            stop_audio()
             # print("net_stop_AudioSrv")
-            p = Popen("net_stop_AudioSrv.bat")
-            stdout, stderr = p.communicate()
+            # p = Popen("net_stop_AudioSrv.bat")
+            # stdout, stderr = p.communicate()
         elif str(myswitch[0]) == '1':
+            start_audio()
             # print("net_start_AudioSrv")
-            p = Popen("net_start_AudioSrv.bat")
-            stdout, stderr = p.communicate()
+            # p = Popen("net_start_AudioSrv.bat")
+            # stdout, stderr = p.communicate()
     if (mytime.hour == int(hour[1])) and (mytime.minute == int(min[1])):
         # print("lai")
         if str(myswitch[1]) == '0':
-            # print("net_stop_AudioSrv")
-            p = Popen("net_stop_AudioSrv.bat")
-            stdout, stderr = p.communicate()
+            stop_audio()
+            # # print("net_stop_AudioSrv")
+            # p = Popen("net_stop_AudioSrv.bat")
+            # stdout, stderr = p.communicate()
         elif str(myswitch[1]) == '1':
+            start_audio()
             # print("net_start_AudioSrv")
-            p = Popen("net_start_AudioSrv.bat")
-            stdout, stderr = p.communicate()
+            # p = Popen("net_start_AudioSrv.bat")
+            # stdout, stderr = p.communicate()
 
     if (mytime.hour == int(hour[2])) and (mytime.minute == int(min[2])):
         # print("lai")
         if str(myswitch[2]) == '0':
+            stop_audio()
             # print("定时执行11")
-            p = Popen("net_stop_AudioSrv.bat")
-            stdout, stderr = p.communicate()
+            # p = Popen("net_stop_AudioSrv.bat")
+            # stdout, stderr = p.communicate()
         elif str(myswitch[2]) == '1':
+            start_audio()
             # print("net_start_AudioSrv")
-            p = Popen("net_start_AudioSrv.bat")
-            stdout, stderr = p.communicate()
+            # p = Popen("net_start_AudioSrv.bat")
+            # stdout, stderr = p.communicate()
 
     if (mytime.hour == int(hour[3])) and (mytime.minute == int(min[3])):
         # print("lai")
         if str(myswitch[3]) == '0':
+            stop_audio()
             # print("net_stop_AudioSrv")
-            p = Popen("net_stop_AudioSrv.bat")
-            stdout, stderr = p.communicate()
+            # p = Popen("net_stop_AudioSrv.bat")
+            # stdout, stderr = p.communicate()
         elif str(myswitch[3]) == '1':
+            start_audio()
             # print("net_start_AudioSrv")
-            p = Popen("net_start_AudioSrv.bat")
-            stdout, stderr = p.communicate()
+            # p = Popen("net_start_AudioSrv.bat")
+            # stdout, stderr = p.communicate()
     if (mytime.hour == int(hour[4])) and (mytime.minute == int(min[4])):
         # print("lai")
         if str(myswitch[4]) == '0':
+            stop_audio()
             # print("net_stop_AudioSrv")
-            p = Popen("net_stop_AudioSrv.bat")
-            stdout, stderr = p.communicate()
+            # p = Popen("net_stop_AudioSrv.bat")
+            # stdout, stderr = p.communicate()
         elif str(myswitch[4]) == '1':
+            start_audio()
             # print("net_start_AudioSrv")
-            p = Popen("net_start_AudioSrv.bat")
-            stdout, stderr = p.communicate()
-    if (mytime.hour == int(hour[4])) and (mytime.minute == int(min[4])):
+            # p = Popen("net_start_AudioSrv.bat")
+            # stdout, stderr = p.communicate()
+    if (mytime.hour == int(hour[5])) and (mytime.minute == int(min[5])):
         # print("lai")
-        if str(myswitch[4]) == '0':
+        if str(myswitch[5]) == '0':
+            stop_audio()
             # print("net_stop_AudioSrv")
-            p = Popen("net_stop_AudioSrv.bat")
-            stdout, stderr = p.communicate()
-        elif str(myswitch[4]) == '1':
+            # p = Popen("net_stop_AudioSrv.bat")
+            # stdout, stderr = p.communicate()
+        elif str(myswitch[5]) == '1':
+            start_audio()
             # print("net_start_AudioSrv")
-            p = Popen("net_start_AudioSrv.bat")
-            stdout, stderr = p.communicate()
+            # p = Popen("net_start_AudioSrv.bat")
+            # stdout, stderr = p.communicate()
 clock()
 
 labelTop = tk.Label(app, text="选择")
